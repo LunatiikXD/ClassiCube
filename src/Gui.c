@@ -455,6 +455,8 @@ static void OnFileChanged(void* obj, struct Stream* stream, const String* name) 
 		Game_UpdateTexture(&Gui.GuiClassicTex, stream, name, NULL);
 	} else if (String_CaselessEqualsConst(name, "icons.png")) {
 		Game_UpdateTexture(&Gui.IconsTex, stream, name, NULL);
+	} else if (String_CaselessEqualsConst(name, "touch.png")) {
+		Game_UpdateTexture(&Gui.TouchTex, stream, name, NULL);
 	}
 }
 
@@ -487,6 +489,7 @@ static void OnContextLost(void* obj) {
 	Gfx_DeleteTexture(&Gui.GuiTex);
 	Gfx_DeleteTexture(&Gui.GuiClassicTex);
 	Gfx_DeleteTexture(&Gui.IconsTex);
+	Gfx_DeleteTexture(&Gui.TouchTex);
 }
 
 static void OnInit(void) {

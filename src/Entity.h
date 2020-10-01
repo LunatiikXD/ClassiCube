@@ -182,6 +182,12 @@ struct NetPlayer {
 CC_API void NetPlayer_Init(struct NetPlayer* player);
 extern struct NetPlayer NetPlayers_List[ENTITIES_SELF_ID];
 
+struct LocalPlayerInput;
+struct LocalPlayerInput {
+	void (*GetMovement)(float* xMoving, float* zMoving);
+	struct LocalPlayerInput* next;
+};
+
 /* Represents the user/player's own entity. */
 struct LocalPlayer {
 	struct Entity Base;
@@ -193,6 +199,7 @@ struct LocalPlayer {
 	struct CollisionsComp Collisions;
 	struct PhysicsComp Physics;
 	cc_bool _warnedRespawn, _warnedFly, _warnedNoclip, _warnedZoom;
+	struct LocalPlayerInput input;
 };
 
 extern struct LocalPlayer LocalPlayer_Instance;
