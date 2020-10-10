@@ -391,6 +391,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 			
 			return new BaseInputConnection(this, true) {
 				@Override
+				public boolean setComposingText(CharSequence text, int newCursorPosition) {
+					boolean success = super.setComposingText(text, newCursorPosition);
+					MainActivity.this.pushCmd(CMD_KEY_TEXT, getEditable().toString());
+					return success;
+				}
+
+				@Override
 				public boolean commitText(CharSequence text, int newCursorPosition) {
 					boolean success = super.commitText(text, newCursorPosition);
 					MainActivity.this.pushCmd(CMD_KEY_TEXT, getEditable().toString());

@@ -3907,7 +3907,15 @@ void Window_OpenKeyboard(int type) {
 	args[0].i = type;
 	JavaCallVoid(env, "openKeyboard", "(I)V", args);
 }
-void Window_SetKeyboardText(const String* text) { }
+void Window_SetKeyboardText(const String* text) {
+	JNIEnv* env;
+	jvalue args[1];
+	JavaGetCurrentEnv(env);
+
+	args[0].l = JavaMakeString(env, text);
+	JavaCallVoid(env, "setKeyboardText", "(Ljava/lang/String;)V", args);
+	(*env)->DeleteLocalRef(env, args[0].l);
+}
 
 void Window_CloseKeyboard(void) {
 	JNIEnv* env;

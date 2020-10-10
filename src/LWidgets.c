@@ -425,6 +425,7 @@ static void LInput_Select(void* widget, cc_bool wasSelected) {
 	if (wasSelected) return;
 	LWidget_Draw(widget);
 	Window_OpenKeyboard(input->password ? KEYBOARD_TYPE_PASSWORD : KEYBOARD_TYPE_TEXT);
+	Window_SetKeyboardText(&input->text);
 }
 
 static void LInput_Unselect(void* widget) {
