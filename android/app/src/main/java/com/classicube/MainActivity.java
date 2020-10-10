@@ -374,15 +374,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 			return MainActivity.this.handleTouchEvent(ev) || super.dispatchTouchEvent(ev);
 		}
 		
-		//@Override
-		//public boolean onCheckIsTextEditor() { return true; }
-		
 		@Override
 		public InputConnection onCreateInputConnection(EditorInfo attrs) {
 			BaseInputConnection ic = new BaseInputConnection(this, true);
 			attrs.actionLabel = null;
 			attrs.inputType   = MainActivity.this.getKeyboardType();
-			attrs.imeOptions  = EditorInfo.IME_ACTION_GO;
 			return ic;
 		}
 	}
@@ -434,12 +430,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	public void openKeyboard(int type) {
 		keyboardType = type;
 		InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		// Restart view so it uses the right INPUT_TYPE
+		if (curView != null) input.restartInput(curView);
 		if (curView != null) input.showSoftInput(curView, 0);
-	}
-	
-	@Override
-	public void onStartInputView(EditorInfo info, boolean restarting) {
-		super.onStartInputView(info, resatarting);
 	}
 
 	public void closeKeyboard() {
@@ -448,8 +441,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	}
 	
 	public int getKeyboardType() {
-		//if (keyboardType == 1) return InputType.TYPE_CLASS_NUMBER;
-		//return InputType.TYPE_CLASS_NUMBER;
+		if (keyboardType == 2) return InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
+		if (keyboardType == 1) return InputType.TYPE_CLASS_NUMBER;
 		return InputType.TYPE_CLASS_TEXT;
 	}
 
