@@ -30,6 +30,8 @@ struct LWidgetVTABLE {
 	void (*OnUnselect)(void* widget);
 	/* Called when mouse wheel is scrolled and this widget is selected. */
 	void (*MouseWheel)(void* widget, float delta);
+	/* Called when on-screen keyboard text changed. */
+	int (*TextChanged)(void* elem, const String* str);
 };
 
 #define LWidget_Layout \

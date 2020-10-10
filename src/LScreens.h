@@ -1,6 +1,6 @@
 #ifndef CC_LSCREENS_H
 #define CC_LSCREENS_H
-#include "Core.h"
+#include "String.h"
 /* Implements screens/menus for the launcher.
 	Copyright 2014-2020 ClassiCube | Licensed under BSD-3
 */
@@ -8,7 +8,7 @@ struct LWidget;
 struct LScreen;
 
 typedef void (*LScreen_Func)(struct LScreen* s);
-typedef void (*LWidget_Func)(struct LScreen* s, struct LWidget* w);
+typedef void(*LWidget_Func)(struct LScreen* s, struct LWidget* w);
 
 #define LScreen_Layout \
 	LScreen_Func Init;   /* Initialises widgets and other data. Only called once. */ \
@@ -17,12 +17,13 @@ typedef void (*LWidget_Func)(struct LScreen* s, struct LWidget* w);
 	LScreen_Func Layout; /* Positions the widgets on the screen. */ \
 	LScreen_Func Draw;   /* Draws all widgets and any other features such as lines/rectangles. */ \
 	LScreen_Func Tick;   /* Repeatedly called multiple times every second. */ \
-	void (*KeyDown)(struct LScreen* s,    int key, cc_bool wasDown); \
-	void (*KeyPress)(struct LScreen* s,   char c);  \
-	void (*MouseDown)(struct LScreen* s,  int btn); \
-	void (*MouseUp)(struct LScreen* s,    int btn); \
-	void (*MouseMove)(struct LScreen* s,  int deltaX, int deltaY); \
-	void (*MouseWheel)(struct LScreen* s, float delta); \
+	void (*KeyDown)(struct LScreen* s,     int key, cc_bool wasDown); \
+	void (*KeyPress)(struct LScreen* s,    char c);  \
+	void (*MouseDown)(struct LScreen* s,   int btn); \
+	void (*MouseUp)(struct LScreen* s,     int btn); \
+	void (*MouseMove)(struct LScreen* s,   int deltaX, int deltaY); \
+	void (*MouseWheel)(struct LScreen* s,  float delta); \
+	void (*TextChanged)(struct LScreen* s, const String* str); \
 	LWidget_Func HoverWidget;    /* Called when mouse is moved over a given widget. */ \
 	LWidget_Func UnhoverWidget;  /* Called when the mouse is moved away from a previously hovered widget. */ \
 	struct LWidget* onEnterWidget;  /* Default widget to auto-click when Enter is pressed. Can be NULL. */ \
