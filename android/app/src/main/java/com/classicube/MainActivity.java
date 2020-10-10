@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	// ======================================
 	// -------------- COMMANDS --------------
 	// ======================================
-	class NativeCmdArgs { public int cmd, arg1, arg2, arg3; public Surface sur; }
+	class NativeCmdArgs { public int cmd, arg1, arg2, arg3; public String str; public Surface sur; }
 	Queue<NativeCmdArgs> nativeCmds = new ConcurrentLinkedQueue<NativeCmdArgs>();
 	Queue<NativeCmdArgs> freeCmds   = new ConcurrentLinkedQueue<NativeCmdArgs>();
 	
@@ -77,6 +77,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 		nativeCmds.add(args);
 	}
 	
+	void pushCmd(int cmd, String text) {
+		NativeCmdArgs args = getCmdArgs();
+		args.cmd = cmd;
+		args.str = text;
+		nativeCmds.add(args);
+	}
+	
 	void pushCmd(int cmd, Surface surface) {
 		NativeCmdArgs args = getCmdArgs();
 		args.cmd = cmd;
@@ -84,9 +91,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 		nativeCmds.add(args);
 	}
 	
-	final static int CMD_KEY_DOWN = 0;
-	final static int CMD_KEY_UP   = 1;
-	final static int CMD_KEY_CHAR = 2;
+	final static int CMD_KEY_DOWN =  0;
+	final static int CMD_KEY_UP   =  1;
+	final static int CMD_KEY_CHAR =  2;
+	final static int CMD_KEY_TEXT = 19;
 	
 	final static int CMD_MOUSE_DOWN = 3;
 	final static int CMD_MOUSE_UP   = 4;
@@ -95,10 +103,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	final static int CMD_WIN_CREATED   = 6;
 	final static int CMD_WIN_DESTROYED = 7;
 	final static int CMD_WIN_RESIZED   = 8;
-	final static int CMD_WIN_REDRAW	= 9;
+	final static int CMD_WIN_REDRAW	   = 9;
 
 	final static int CMD_APP_START   = 10;
-	final static int CMD_APP_STOP	= 11;
+	final static int CMD_APP_STOP	 = 11;
 	final static int CMD_APP_RESUME  = 12;
 	final static int CMD_APP_PAUSE   = 13;
 	final static int CMD_APP_DESTROY = 14;
@@ -251,6 +259,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 			case CMD_KEY_DOWN: processKeyDown(c.arg1); break;
 			case CMD_KEY_UP:   processKeyUp(c.arg1);   break;
 			case CMD_KEY_CHAR: processKeyChar(c.arg1); break;
+			case CMD_KEY_TEXT: processKeyText(c.str);  break;
 	
 			case CMD_MOUSE_DOWN: processMouseDown(c.arg1, c.arg2, c.arg3); break;
 			case CMD_MOUSE_UP:   processMouseUp(c.arg1,   c.arg2, c.arg3); break;
@@ -281,6 +290,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	native void processKeyDown(int code);
 	native void processKeyUp(int code);
 	native void processKeyChar(int code);
+	native void processKeyText(String str);
 	
 	native void processMouseDown(int id, int x, int y);
 	native void processMouseUp(int id, int x, int y);
@@ -376,13 +386,20 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 		
 		@Override
 		public InputConnection onCreateInputConnection(EditorInfo attrs) {
-			BaseInputConnection ic = new BaseInputConnection(this, true);
 			attrs.actionLabel = null;
 			attrs.inputType   = MainActivity.this.getKeyboardType();
-			return ic;
+			
+			return new BaseInputConnection(this, true) {
+				@Override
+				public boolean commitText(CharSequence text, int newCursorPosition) {
+					boolean success = super.commitText(text, newCursorPosition);
+					MainActivity.this.pushCmd(CMD_KEY_TEXT, getEditable().toString());
+					return success;
+				}
+			};
 		}
 	}
-	
+
 	// ======================================
 	// -------------- PLATFORM --------------
 	// ======================================

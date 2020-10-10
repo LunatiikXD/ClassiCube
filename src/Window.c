@@ -3657,6 +3657,14 @@ static void JNICALL java_processKeyChar(JNIEnv* env, jobject o, jint code) {
 	}
 }
 
+static void JNICALL java_processKeyText(JNIEnv* env, jobject o, jstring str) {
+	String text = JavaGetString(env, str);
+	Platform_Log1("KEY - TEXT %s", &text);
+
+	Event_RaiseString(&InputEvents.TextChanged, &text);
+	(*env)->ReleaseStringUTFChars(env, str, text.buffer);
+}
+
 static void JNICALL java_processMouseDown(JNIEnv* env, jobject o, jint id, jint x, jint y) {
 	Platform_Log3("MOUSE %i - DOWN %i,%i", &id, &x, &y);
 	Input_AddTouch(id, x, y);
@@ -3746,10 +3754,11 @@ static void JNICALL java_onLowMemory(JNIEnv* env, jobject o) {
 	/* TODO: Low memory */
 }
 
-static const JNINativeMethod methods[18] = {
-	{ "processKeyDown",   "(I)V", java_processKeyDown },
-	{ "processKeyUp",     "(I)V", java_processKeyUp },
-	{ "processKeyChar",   "(I)V", java_processKeyChar },
+static const JNINativeMethod methods[19] = {
+	{ "processKeyDown",   "(I)V",   java_processKeyDown },
+	{ "processKeyUp",     "(I)V",   java_processKeyUp },
+	{ "processKeyChar",   "(I)V",   java_processKeyChar },
+	{ "processKeyText",   "(Ljava/lang/String;)V", java_processKeyText },
 
 	{ "processMouseDown", "(III)V", java_processMouseDown },
 	{ "processMouseUp",   "(III)V", java_processMouseUp },
