@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -33,6 +34,9 @@ import android.view.WindowManager;
 import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.Window;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 
 // implements InputQueue.Callback
@@ -359,11 +363,27 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	
 	class LauncherView extends SurfaceView {
 		
-		public LauncherView(Context context) { super(context); }
+		public LauncherView(Context context) { 
+			super(context);
+			setFocusable(true);
+			setFocusableInTouchMode(true);
+		}
 		
 		@Override
 		public boolean dispatchTouchEvent(MotionEvent ev) {
 			return MainActivity.this.handleTouchEvent(ev) || super.dispatchTouchEvent(ev);
+		}
+		
+		//@Override
+		//public boolean onCheckIsTextEditor() { return true; }
+		
+		@Override
+		public InputConnection onCreateInputConnection(EditorInfo attrs) {
+			BaseInputConnection ic = new BaseInputConnection(this, true);
+			attrs.actionLabel = null;
+			attrs.inputType   = MainActivity.this.getKeyboardType();
+			attrs.imeOptions  = EditorInfo.IME_ACTION_GO;
+			return ic;
 		}
 	}
 	
@@ -410,16 +430,27 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	// ======================================
 	public void setWindowTitle(String str) { setTitle(str); }
 	
-	public void openKeyboard() {
+	int keyboardType;
+	public void openKeyboard(int type) {
+		keyboardType = type;
 		InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		View view = getWindow().getDecorView();
-		input.showSoftInput(view, 0);
+		if (curView != null) input.showSoftInput(curView, 0);
+	}
+	
+	@Override
+	public void onStartInputView(EditorInfo info, boolean restarting) {
+		super.onStartInputView(info, resatarting);
 	}
 
 	public void closeKeyboard() {
 		InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		View view = getWindow().getDecorView();
-		input.hideSoftInputFromWindow(view.getWindowToken(), 0);
+		if (curView != null) input.hideSoftInputFromWindow(curView.getWindowToken(),  0);
+	}
+	
+	public int getKeyboardType() {
+		//if (keyboardType == 1) return InputType.TYPE_CLASS_NUMBER;
+		//return InputType.TYPE_CLASS_NUMBER;
+		return InputType.TYPE_CLASS_TEXT;
 	}
 
 	public String getClipboardText() {

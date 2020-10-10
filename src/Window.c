@@ -3892,8 +3892,11 @@ void Window_FreeFramebuffer(struct Bitmap* bmp) {
 
 void Window_OpenKeyboard(int type) {
 	JNIEnv* env;
+	jvalue args[1];
 	JavaGetCurrentEnv(env);
-	JavaCallVoid(env, "openKeyboard", "()V", NULL);
+
+	args[0].i = type;
+	JavaCallVoid(env, "openKeyboard", "(I)V", args);
 }
 void Window_SetKeyboardText(const String* text) { }
 
