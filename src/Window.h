@@ -130,7 +130,7 @@ void Window_FreeFramebuffer(struct Bitmap* bmp);
 
 /* Displays on-screen keyboard for platforms that lack physical keyboard input. */
 /* NOTE: On desktop platforms, this won't do anything. */
-void Window_OpenKeyboard(int type);
+void Window_OpenKeyboard(const String* text, int type);
 /* Sets the text used for keyboard input. */
 /* NOTE: This is only used for mobile on-screen keyboard input with the web client, */
 /* because it is backed by a HTML input, rather than true keyboard input events. */

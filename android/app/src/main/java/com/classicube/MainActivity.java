@@ -37,6 +37,7 @@ import android.view.Window;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodManager;
 
 // implements InputQueue.Callback
@@ -120,9 +121,11 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	// --------------- EVENTS ---------------
 	// ======================================
 	static boolean gameHooked;
+	InputMethodManager input;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 		Log.i("CC_WIN", "CREATE EVENT");
 		Window window = getWindow();
 		Log.i("CC_WIN", "GAME RUNNING?" + gameHooked);
@@ -281,7 +284,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 			//case CMD_CONFIG_CHANGED: processOnConfigChanged(); break;
 			case CMD_LOW_MEMORY:	 processOnLowMemory();	 break;
 			}
-			
+
+			c.str = null;
 			c.sur = null; // don't keep a reference to it
 			freeCmds.add(c);
 		}
@@ -388,8 +392,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 		public InputConnection onCreateInputConnection(EditorInfo attrs) {
 			attrs.actionLabel = null;
 			attrs.inputType   = MainActivity.this.getKeyboardType();
+			attrs.imeOptions  = EditorInfo.IME_ACTION_GO;
 			
-			return new BaseInputConnection(this, true) {
+			InputConnection ic = new BaseInputConnection(this, true) {
 				@Override
 				public boolean setComposingText(CharSequence text, int newCursorPosition) {
 					boolean success = super.setComposingText(text, newCursorPosition);
@@ -404,6 +409,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 					return success;
 				}
 			};
+
+			String text = MainActivity.this.keyboardText;
+			if (text != null) ic.setComposingText(text, 0);
+			return ic;
 		}
 	}
 
@@ -450,18 +459,33 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback2 {
 	// ======================================
 	public void setWindowTitle(String str) { setTitle(str); }
 	
-	int keyboardType;
-	public void openKeyboard(int type) {
+	volatile int keyboardType;
+	volatile String keyboardText;
+	public void openKeyboard(String text, int type) {
 		keyboardType = type;
-		InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		// Restart view so it uses the right INPUT_TYPE
-		if (curView != null) input.restartInput(curView);
-		if (curView != null) input.showSoftInput(curView, 0);
+		keyboardText = text;
+		//runOnUiThread(new Runnable() {
+			//public void run() {
+				// Restart view so it uses the right INPUT_TYPE
+				if (curView != null) input.restartInput(curView);
+				if (curView != null) input.showSoftInput(curView, 0);
+			//}
+		//});
 	}
 
 	public void closeKeyboard() {
-		InputMethodManager input = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (curView != null) input.hideSoftInputFromWindow(curView.getWindowToken(),  0);
+		keyboardText = null;
+		//runOnUiThread(new Runnable() {
+			//public void run() {
+				if (curView != null) input.hideSoftInputFromWindow(curView.getWindowToken(), 0);
+			//}
+		//});
+	}
+
+	public void setKeyboardText(String text) {
+		keyboardText = text;
+		// Restart view because text changed externally
+		if (curView != null) input.restartInput(curView);
 	}
 	
 	public int getKeyboardType() {
